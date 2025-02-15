@@ -20,9 +20,6 @@ interface CitySearchProps {
   isLoading?: boolean
 }
 
-const RECENT_CITIES_KEY = 'recentCities'
-const MAX_RECENT_CITIES = 5
-
 export function CitySearch({ onCitySelect, isLoading }: CitySearchProps) {
   const [open, setOpen] = useState(false)
   const [value, setValue] = useState("")
@@ -147,7 +144,7 @@ export function CitySearch({ onCitySelect, isLoading }: CitySearchProps) {
         </div>
 
         {open && (
-          <div className="absolute left-0 right-0 top-[calc(100%+8px)] overflow-hidden rounded-2xl bg-gradient-to-b from-white/20 to-white/10 p-1 shadow-xl ring-1 ring-white/20">
+          <div className="absolute left-0 right-0 top-[calc(100%+8px)] overflow-hidden rounded-2xl bg-gradient-to-b from-white/20 to-white/10 p-1 shadow-xl ring-1 ring-white/20 z-50">
             {error ? (
               <div className="p-4 text-sm text-red-400">{error}</div>
             ) : value.length === 0 ? (

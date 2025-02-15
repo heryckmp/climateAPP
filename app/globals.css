@@ -38,3 +38,28 @@
 .wind-line {
   animation: wind linear infinite;
 }
+
+/* Leaflet Map Styles */
+.leaflet-container {
+  width: 100%;
+  height: 100%;
+}
+
+.leaflet-div-icon {
+  background: transparent;
+  border: none;
+}
+
+.leaflet-marker-icon {
+  filter: drop-shadow(0 0 2px rgba(0, 0, 0, 0.5));
+}
+
+.leaflet-control-container .leaflet-control {
+  background-color: rgba(255, 255, 255, 0.9);
+  border-radius: 8px;
+  backdrop-filter: blur(8px);
+}
+
+.leaflet-control-zoom a {
+  color: #1a1a1a !important;
+}
