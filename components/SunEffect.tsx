@@ -1,5 +1,11 @@
-export const SunEffect = () => (
-  <div className="sun-container absolute inset-0 pointer-events-none overflow-hidden">
+import React from 'react'
+
+interface SunEffectProps {
+  opacity?: number;
+}
+
+export const SunEffect: React.FC<SunEffectProps> = ({ opacity = 1 }) => (
+  <div className="sun-container absolute inset-0 pointer-events-none overflow-hidden" style={{ opacity }}>
     {/* 大气光晕效果 */}
     <div className="absolute top-[-150px] right-[-150px] w-[300px] h-[300px] opacity-30">
       <div className="absolute inset-0 rounded-full bg-gradient-radial from-yellow-100/80 via-orange-200/50 to-transparent blur-[50px]" />
