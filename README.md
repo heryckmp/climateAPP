@@ -12,6 +12,19 @@ ClimateAPP é uma aplicação web moderna para consulta de previsão do tempo, d
 - 🎨 Efeitos visuais dinâmicos baseados no clima
 - 🕒 Relógio local em tempo real
 - 📱 Design responsivo
+- 🌍 Globo interativo 3D com:
+  - Localização do usuário em tempo real
+  - Conexões globais animadas
+  - Efeitos de iluminação realistas
+  - Textura de alta resolução
+  - Atmosfera dinâmica
+  - Rotação automática suave
+- 🛰️ Radar meteorológico em tempo real:
+  - Visualização de precipitação
+  - Animação temporal do radar
+  - Controles de reprodução
+  - Múltiplas camadas de mapa
+  - Zoom automático para localização
 
 ## 🚀 Tecnologias
 
@@ -21,6 +34,10 @@ ClimateAPP é uma aplicação web moderna para consulta de previsão do tempo, d
 - [Tailwind CSS](https://tailwindcss.com/)
 - [Lucide Icons](https://lucide.dev/)
 - [Meteoblue API](https://www.meteoblue.com/)
+- [Three.js](https://threejs.org/)
+- [React-Globe.GL](https://github.com/vasturiano/react-globe.gl)
+- [Leaflet](https://leafletjs.com/)
+- [RainViewer API](https://www.rainviewer.com/)
 
 ## 🎨 Efeitos Visuais
 
@@ -101,3 +118,32 @@ Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para ma
 
 - [Meteoblue](https://www.meteoblue.com/) pela API de previsão do tempo
 - [Lucide](https://lucide.dev/) pelos ícones
+- [RainViewer](https://www.rainviewer.com/) pela API do radar meteorológico
+
+## 🌍 Globo Interativo
+
+O aplicativo inclui um globo terrestre 3D interativo com recursos avançados:
+- Visualização da localização do usuário em tempo real
+- Conexões globais animadas com efeito de brilho
+- Textura realista da Terra em alta resolução
+- Efeitos de relevo e topografia
+- Atmosfera dinâmica com gradiente de cores
+- Iluminação realista com reflexos nos oceanos
+- Rotação automática suave
+- Interatividade com zoom e rotação
+- Marcador personalizado para localização atual
+
+## 🛰️ Radar Meteorológico
+
+O aplicativo oferece um radar meteorológico interativo com recursos avançados:
+- Visualização em tempo real da precipitação
+- Animação temporal com controles de reprodução (play/pause/avançar/retroceder)
+- Múltiplas camadas de mapa:
+  - Mapa padrão
+  - Visualização por satélite
+  - Satélite com rótulos
+- Zoom automático para a localização do usuário
+- Atualização automática a cada 5 minutos
+- Interface intuitiva com controles de tempo
+- Marcador de localização atual
+- Escala de tempo com horários
