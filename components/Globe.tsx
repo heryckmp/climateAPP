@@ -11,17 +11,29 @@ interface UserLocation {
   label?: string;
 }
 
-export default function InteractiveGlobe() {
+interface GlobeProps {
+  isIntro?: boolean;
+}
+
+export default function InteractiveGlobe({ isIntro = false }: GlobeProps) {
   const globeRef = useRef<any>()
   const [dimensions, setDimensions] = useState({ width: 0, height: 300 })
   const [isMounted, setIsMounted] = useState(false)
   const [userLocation, setUserLocation] = useState<UserLocation | null>(null)
+  const [zoomComplete, setZoomComplete] = useState(false)
 
   useEffect(() => {
     setIsMounted(true)
     const updateDimensions = () => {
-      const width = Math.min(window.innerWidth - 40, 800)
-      setDimensions({ width, height: 300 })
+      if (isIntro) {
+        setDimensions({ 
+          width: window.innerWidth, 
+          height: window.innerHeight 
+        })
+      } else {
+        const width = Math.min(window.innerWidth - 40, 800)
+        setDimensions({ width, height: 300 })
+      }
     }
 
     updateDimensions()
@@ -40,16 +52,37 @@ export default function InteractiveGlobe() {
 
           // Configurar visualização inicial do globo
           if (globeRef.current) {
-            globeRef.current.controls().autoRotate = true
+            globeRef.current.controls().autoRotate = !isIntro
             globeRef.current.controls().autoRotateSpeed = 0.5
-            globeRef.current.controls().enableZoom = true
+            globeRef.current.controls().enableZoom = !isIntro
             
             // Ajustar ponto de vista para a localização do usuário
-            globeRef.current.pointOfView({
-              lat: location.lat,
-              lng: location.lng,
-              altitude: 0.4
-            }, 2000)
+            if (isIntro) {
+              // Começa de longe e faz zoom
+              globeRef.current.pointOfView({
+                lat: location.lat,
+                lng: location.lng,
+                altitude: 2.5
+              }, 0)
+
+              setTimeout(() => {
+                globeRef.current.pointOfView({
+                  lat: location.lat,
+                  lng: location.lng,
+                  altitude: 0.1
+                }, 7000)
+                
+                setTimeout(() => {
+                  setZoomComplete(true)
+                }, 7000)
+              }, 1000)
+            } else {
+              globeRef.current.pointOfView({
+                lat: location.lat,
+                lng: location.lng,
+                altitude: 0.4
+              }, 2000)
+            }
           }
         },
         (error) => {
@@ -66,7 +99,7 @@ export default function InteractiveGlobe() {
     }
 
     return () => window.removeEventListener('resize', updateDimensions)
-  }, [])
+  }, [isIntro])
 
   // Configuração dos marcadores
   const markerData = userLocation ? [userLocation] : []
@@ -110,7 +143,9 @@ export default function InteractiveGlobe() {
   if (!isMounted) return null
 
   return (
-    <div className="relative w-full flex justify-center items-center mt-32 mb-16">
+    <div 
+      className={`relative flex justify-center items-center ${isIntro ? 'w-full h-full' : 'mt-32 mb-16'}`}
+    >
       <div 
         className="relative rounded-xl overflow-hidden"
         style={{ 
@@ -129,7 +164,7 @@ export default function InteractiveGlobe() {
           backgroundImageUrl={null}
           atmosphereColor="rgb(155, 200, 255)"
           atmosphereAltitude={0.18}
-          enablePointerInteraction={true}
+          enablePointerInteraction={!isIntro}
           pointsData={[]}
           customLayerData={markerData}
           customThreeObject={() => {
