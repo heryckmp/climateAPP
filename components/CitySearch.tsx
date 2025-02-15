@@ -115,13 +115,13 @@ export function CitySearch({ onCitySelect, isLoading }: CitySearchProps) {
   }
 
   return (
-    <div className="relative w-full max-w-[400px]">
+    <div className="relative w-full max-w-[600px]">
       <Command className="relative overflow-visible">
-        <div className="group relative flex items-center rounded-full border-0 bg-gradient-to-r from-white/20 to-white/10 px-4 ring-1 ring-white/20 transition-all duration-300 hover:ring-white/30">
+        <div className="group relative flex items-center rounded-full border-0 bg-gradient-to-r from-white/20 to-white/10 px-6 ring-1 ring-white/20 transition-all duration-300 hover:ring-white/30">
           {loading ? (
-            <Loader2 className="h-4 w-4 shrink-0 animate-spin text-white" />
+            <Loader2 className="h-5 w-5 shrink-0 animate-spin text-white" />
           ) : (
-            <Search className="h-4 w-4 shrink-0 text-white" />
+            <Search className="h-5 w-5 shrink-0 text-white" />
           )}
           <Command.Input
             ref={inputRef}
@@ -130,15 +130,15 @@ export function CitySearch({ onCitySelect, isLoading }: CitySearchProps) {
             onFocus={() => setOpen(true)}
             onKeyDown={handleKeyDown}
             placeholder="Digite uma cidade para ver o clima..."
-            className="flex h-12 w-full bg-transparent px-3 text-[15px] font-medium text-white placeholder:text-white/60 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+            className="flex h-14 w-full bg-transparent px-4 text-[16px] font-medium text-white placeholder:text-white/60 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
             disabled={isLoading}
           />
           {value && (
             <button
               onClick={() => setValue('')}
-              className="rounded-full p-1.5 text-white opacity-0 transition-opacity hover:bg-white/20 group-hover:opacity-100"
+              className="rounded-full p-2 text-white opacity-0 transition-opacity hover:bg-white/20 group-hover:opacity-100"
             >
-              <X className="h-4 w-4" />
+              <X className="h-5 w-5" />
             </button>
           )}
         </div>
@@ -148,11 +148,7 @@ export function CitySearch({ onCitySelect, isLoading }: CitySearchProps) {
             {error ? (
               <div className="p-4 text-sm text-red-400">{error}</div>
             ) : value.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-6 text-white">
-                <Search className="mb-2 h-10 w-10 opacity-60" />
-                <div className="text-sm font-medium">Busque uma cidade para ver a previsão</div>
-                <div className="mt-1 text-xs text-white/60">Digite o nome da cidade que deseja consultar</div>
-              </div>
+              <div className="p-2" />
             ) : cities.length > 0 ? (
               <Command.List>
                 {cities.map((city) => (
