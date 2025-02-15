@@ -1,11 +1,11 @@
 'use client'
 
-import { MapContainer, TileLayer, Marker, Popup, useMap, LayersControl } from 'react-leaflet'
+import { MapContainer, TileLayer, Marker, Popup, useMap, LayersControl, CircleMarker } from 'react-leaflet'
 import { useState, useEffect } from 'react'
 import 'leaflet/dist/leaflet.css'
 import L from 'leaflet'
 import type { LatLngTuple } from 'leaflet'
-import { Play, Pause, SkipBack, SkipForward } from 'lucide-react'
+import { Play, Pause, SkipBack, SkipForward, Cloud, Droplets } from 'lucide-react'
 
 // Fix for Leaflet default marker icons
 const DefaultIcon = L.icon({
@@ -68,6 +68,16 @@ interface RadarFrame {
 interface RadarData {
   past: RadarFrame[];
   nowcast: RadarFrame[];
+}
+
+interface PrecipitationData {
+  datetime: string;
+  precip: number;
+  temp: number;
+  conditions: string;
+  icon: string;
+  lat: number;
+  lon: number;
 }
 
 function TimeControl({ frames, currentFrame, onFrameChange, isPlaying, onPlayPause }: {
@@ -135,6 +145,8 @@ export default function RadarMap() {
   const [isLocating, setIsLocating] = useState(true)
   const [locationError, setLocationError] = useState<string | null>(null)
   const [hasUserLocation, setHasUserLocation] = useState(false)
+  const [precipitationData, setPrecipitationData] = useState<PrecipitationData[]>([])
+  const [showPrecipitation, setShowPrecipitation] = useState(false)
 
   useEffect(() => {
     setIsMounted(true)
@@ -217,6 +229,48 @@ export default function RadarMap() {
     }
   }, [])
 
+  // Novo useEffect para buscar dados de precipitação
+  useEffect(() => {
+    async function fetchPrecipitationData() {
+      if (!hasUserLocation) return;
+
+      try {
+        const response = await fetch(`/api/weather?lat=${center[0]}&lon=${center[1]}`)
+        
+        if (!response.ok) throw new Error('Falha ao buscar dados de precipitação');
+        
+        const data = await response.json();
+        
+        // Formatando dados horários com precipitação
+        const precipData = data.data.hours?.map((hour: any) => ({
+          datetime: hour.datetime,
+          precip: hour.precip || 0,
+          temp: hour.temp,
+          conditions: hour.conditions,
+          icon: hour.icon,
+          lat: center[0],
+          lon: center[1]
+        })) || [];
+
+        setPrecipitationData(precipData);
+      } catch (error) {
+        console.error('Erro ao buscar dados de precipitação:', error);
+      }
+    }
+
+    fetchPrecipitationData();
+  }, [center, hasUserLocation]);
+
+  // Função para gerar a cor baseada na intensidade da precipitação
+  const getPrecipitationColor = (precip: number): string => {
+    if (precip === 0) return 'transparent';
+    if (precip < 0.5) return '#a8d5ff80';
+    if (precip < 2) return '#4a9eff80';
+    if (precip < 5) return '#0066ff80';
+    if (precip < 10) return '#0040ff80';
+    return '#0000ff80';
+  };
+
   if (!isMounted) {
     return (
       <div className="flex items-center justify-center h-[calc(100vh-80px)] bg-gray-800 text-white">
@@ -274,6 +328,33 @@ export default function RadarMap() {
               />
             )}
           </LayersControl.Overlay>
+
+          <LayersControl.Overlay name="Precipitação (Visual Crossing)">
+            {showPrecipitation && precipitationData.map((data, index) => (
+              <CircleMarker
+                key={index}
+                center={[data.lat, data.lon]}
+                radius={30}
+                fillColor={getPrecipitationColor(data.precip)}
+                fillOpacity={0.6}
+                stroke={false}
+              >
+                <Popup>
+                  <div className="text-sm">
+                    <p className="font-semibold">{new Date(data.datetime).toLocaleTimeString()}</p>
+                    <div className="flex items-center gap-2">
+                      <Droplets className="w-4 h-4" />
+                      <span>Precipitação: {data.precip}mm</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Cloud className="w-4 h-4" />
+                      <span>{data.conditions}</span>
+                    </div>
+                  </div>
+                </Popup>
+              </CircleMarker>
+            ))}
+          </LayersControl.Overlay>
         </LayersControl>
 
         {hasUserLocation && (
@@ -287,6 +368,19 @@ export default function RadarMap() {
           </>
         )}
       </MapContainer>
+
+      {/* Controle de camadas personalizado */}
+      <div className="absolute top-20 right-4 z-[1000] bg-white/90 backdrop-blur-sm px-4 py-2 rounded-lg shadow-lg">
+        <label className="flex items-center gap-2 cursor-pointer">
+          <input
+            type="checkbox"
+            checked={showPrecipitation}
+            onChange={(e) => setShowPrecipitation(e.target.checked)}
+            className="rounded"
+          />
+          <span className="text-sm">Mostrar Precipitação</span>
+        </label>
+      </div>
 
       {frames.length > 0 && currentFrame && (
         <TimeControl

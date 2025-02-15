@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 
-const METEOBLUE_API_KEY = process.env.METEOBLUE_API_KEY
+const VISUAL_CROSSING_API_KEY = process.env.VISUAL_CROSSING_API_KEY
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url)
@@ -10,21 +10,19 @@ export async function GET(request: Request) {
   const state = searchParams.get('state')
   const country = searchParams.get('country')
 
-  console.log('Recebendo requisição com:', { lat, lon, apiKey: METEOBLUE_API_KEY?.slice(0, 5) })
-
   if (!lat || !lon) {
     return NextResponse.json({ error: 'Latitude e longitude são necessárias' }, { status: 400 })
   }
 
-  if (!METEOBLUE_API_KEY) {
+  if (!VISUAL_CROSSING_API_KEY) {
     console.error('API key não encontrada')
     return NextResponse.json({ error: 'Configuração da API inválida' }, { status: 500 })
   }
 
   try {
-    const url = `https://my.meteoblue.com/packages/basic-day?apikey=${METEOBLUE_API_KEY}&lat=${lat}&lon=${lon}&asl=0&format=json&tz=America%2FSao_Paulo&temperature=C&windspeed=kmh&precipitationamount=mm&winddirection=degree`
+    const url = `https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/timeline/${lat},${lon}?unitGroup=metric&include=current,daily,alerts,hours&key=${VISUAL_CROSSING_API_KEY}&contentType=json&lang=pt`
     
-    console.log('Fazendo requisição para:', url.replace(METEOBLUE_API_KEY, 'XXXXX'))
+    console.log('Fazendo requisição para:', url.replace(VISUAL_CROSSING_API_KEY, 'XXXXX'))
     
     const response = await fetch(url)
     
@@ -40,80 +38,59 @@ export async function GET(request: Request) {
 
     const data = await response.json()
     
-    // Log detalhado dos dados de localização
-    console.log('Dados brutos de localização:', {
-      metadataName: data.metadata?.name,
-      locationParts: data.metadata?.name?.split(',').map(part => part.trim()),
-      location: data.location,
-      metadata: data.metadata
-    })
-
-    // Verificando se os dados têm a estrutura esperada
-    if (!data.data_day) {
-      console.error('Dados inválidos recebidos:', data)
-      throw new Error('Formato de dados inválido')
-    }
-
-    // Extraindo informações de localização de forma mais segura
-    let locationName, state, country;
-
-    if (data.metadata?.name) {
-      const locationParts = data.metadata.name.split(',').map(part => part.trim())
-      locationName = locationParts[0]
-      state = locationParts[3]
-      country = locationParts[locationParts.length - 1]
-    } else if (data.location) {
-      locationName = data.location.name
-      state = data.location.state || data.location.region
-      country = data.location.country
-    }
-
-    // Usando valores padrão se nenhum dado for encontrado
-    locationName = locationName || "Local não encontrado"
-    state = state || ""
-    country = country || "Brasil"
-
-    console.log('Dados de localização processados:', { locationName, state, country })
-
+    // Formatando os dados para o formato esperado pelo nosso app
     const formattedData = {
       code: "0",
       data: {
         location: {
           name: name || "Local não encontrado",
           path: `${name}, ${state}, ${country}`,
-          timezone: "America/Sao_Paulo"
+          timezone: data.timezone
         },
         now: {
-          temperature: data.data_day.temperature_mean?.[0] || 0,
-          humidity: data.data_day.relativehumidity_mean?.[0] || 0,
-          pressure: data.data_day.pressure_mean?.[0] || 0,
-          windDirection: (data.data_day.winddirection?.[0] || 0).toString(),
-          windDirectionDegree: data.data_day.winddirection?.[0] || 0,
-          windSpeed: data.data_day.windspeed_mean?.[0] || 0,
-          windScale: (data.data_day.windspeed_mean?.[0] || 0).toString(),
-          precipitation: data.data_day.precipitation?.[0] || 0,
-          text: getWeatherText(data.data_day.pictocode?.[0] || 0),
-          code: (data.data_day.pictocode?.[0] || 0).toString()
+          temperature: data.currentConditions.temp,
+          humidity: data.currentConditions.humidity,
+          pressure: data.currentConditions.pressure,
+          windDirection: data.currentConditions.winddir.toString(),
+          windDirectionDegree: data.currentConditions.winddir,
+          windSpeed: data.currentConditions.windspeed,
+          windScale: data.currentConditions.windspeed.toString(),
+          precipitation: data.currentConditions.precip || 0,
+          text: getWeatherText(data.currentConditions.icon),
+          code: getWeatherCode(data.currentConditions.icon)
         },
-        daily: (data.data_day.time || []).map((date, index) => ({
-          date,
-          dayText: getWeatherText(data.data_day.pictocode?.[index] || 0),
-          nightText: getWeatherText(data.data_day.pictocode?.[index] || 0),
-          dayCode: (data.data_day.pictocode?.[index] || 0).toString(),
-          nightCode: (data.data_day.pictocode?.[index] || 0).toString(),
-          high: data.data_day.temperature_max?.[index] || 0,
-          low: data.data_day.temperature_min?.[index] || 0,
-          dayWindDirection: (data.data_day.winddirection?.[index] || 0).toString(),
-          dayWindScale: (data.data_day.windspeed_max?.[index] || 0).toString(),
-          nightWindDirection: (data.data_day.winddirection?.[index] || 0).toString(),
-          nightWindScale: (data.data_day.windspeed_min?.[index] || 0).toString()
+        daily: data.days.slice(0, 7).map(day => ({
+          date: day.datetime,
+          dayText: getWeatherText(day.icon),
+          nightText: getWeatherText(day.icon),
+          dayCode: getWeatherCode(day.icon),
+          nightCode: getWeatherCode(day.icon),
+          high: day.tempmax,
+          low: day.tempmin,
+          dayWindDirection: day.winddir.toString(),
+          dayWindScale: day.windspeed.toString(),
+          nightWindDirection: day.winddir.toString(),
+          nightWindScale: day.windspeed.toString()
         })),
         lastUpdate: new Date().toISOString(),
-        alarm: []
+        alarm: data.alerts ? data.alerts.map(alert => ({
+          id: alert.event,
+          title: alert.description,
+          severity: getSeverityColor(alert.severity),
+          signaltype: alert.event,
+          signallevel: alert.severity,
+          effective: new Date(alert.onset).toLocaleString()
+        })) : [],
+        hours: data.days[0].hours.map(hour => ({
+          datetime: `${data.days[0].datetime} ${hour.datetime}`,
+          temp: hour.temp,
+          precip: hour.precip || 0,
+          conditions: hour.conditions,
+          icon: hour.icon
+        }))
       }
     }
 
-    console.log('Dados formatados:', JSON.stringify(formattedData, null, 2))
     return NextResponse.json(formattedData)
   } catch (error) {
     console.error('Erro completo:', error)
@@ -124,33 +101,68 @@ export async function GET(request: Request) {
   }
 }
 
-function getWeatherText(pictocode: number): string {
-  const weatherCodes = {
-    1: "Ensolarado",
-    2: "Parcialmente nublado",
-    3: "Nublado",
-    4: "Nublado com chuva",
-    5: "Chuva",
-    6: "Tempestade",
-    7: "Neve",
-    8: "Nevoeiro",
-    9: "Chuva congelada",
-    10: "Chuva com neve",
-    11: "Chuva fraca",
-    12: "Chuva moderada",
-    13: "Chuva forte",
-    14: "Trovoada",
-    15: "Granizo",
-    16: "Neve fraca",
-    17: "Neve moderada",
-    18: "Neve forte",
-    19: "Tempestade de raios",
-    20: "Ventania",
-    21: "Neblina",
-    22: "Garoa",
-    23: "Geada",
-    24: "Céu limpo",
-    25: "Parcialmente ensolarado"
+// Função para converter os ícones do Visual Crossing para nossos códigos
+function getWeatherCode(icon: string): string {
+  const iconMap: { [key: string]: string } = {
+    'clear-day': '1',
+    'clear-night': '24',
+    'partly-cloudy-day': '2',
+    'partly-cloudy-night': '25',
+    'cloudy': '3',
+    'rain': '5',
+    'showers-day': '4',
+    'showers-night': '4',
+    'thunder-rain': '6',
+    'thunder-showers-day': '6',
+    'thunder-showers-night': '6',
+    'snow': '7',
+    'snow-showers-day': '16',
+    'snow-showers-night': '16',
+    'sleet': '9',
+    'wind': '20',
+    'fog': '8',
+    'freezing-drizzle': '22',
+    'freezing-rain': '9',
+    'thunder': '19'
   }
-  return weatherCodes[pictocode] || "Tempo variável"
+  return iconMap[icon] || '3'
+}
+
+// Função para converter os ícones em texto descritivo
+function getWeatherText(icon: string): string {
+  const textMap: { [key: string]: string } = {
+    'clear-day': 'Ensolarado',
+    'clear-night': 'Céu Limpo',
+    'partly-cloudy-day': 'Parcialmente Nublado',
+    'partly-cloudy-night': 'Parcialmente Nublado',
+    'cloudy': 'Nublado',
+    'rain': 'Chuva',
+    'showers-day': 'Pancadas de Chuva',
+    'showers-night': 'Pancadas de Chuva',
+    'thunder-rain': 'Tempestade',
+    'thunder-showers-day': 'Tempestade',
+    'thunder-showers-night': 'Tempestade',
+    'snow': 'Neve',
+    'snow-showers-day': 'Neve Fraca',
+    'snow-showers-night': 'Neve Fraca',
+    'sleet': 'Chuva Congelada',
+    'wind': 'Ventania',
+    'fog': 'Nevoeiro',
+    'freezing-drizzle': 'Garoa',
+    'freezing-rain': 'Chuva Congelada',
+    'thunder': 'Tempestade de Raios'
+  }
+  return textMap[icon] || 'Tempo Variável'
+}
+
+// Função para determinar a cor baseada na severidade do alerta
+function getSeverityColor(severity: string): string {
+  const severityColors: { [key: string]: string } = {
+    'extreme': '#ff0000',
+    'severe': '#ff4444',
+    'moderate': '#ffaa00',
+    'minor': '#ffff00',
+    'unknown': '#cccccc'
+  }
+  return severityColors[severity.toLowerCase()] || '#cccccc'
 }
