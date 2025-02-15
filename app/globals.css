@@ -1,0 +1,40 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Rain Effect */
+@keyframes rain {
+  0% { transform: translateY(-100vh); }
+  100% { transform: translateY(100vh); }
+}
+.rain-drop {
+  height: 20px;
+  animation: rain linear infinite;
+}
+
+/* Snow Effect */
+@keyframes snowfall {
+  0% { transform: translateY(-100vh) rotate(0deg); }
+  100% { transform: translateY(100vh) rotate(360deg); }
+}
+.snowflake {
+  animation: snowfall linear infinite;
+}
+
+/* Sun Effect */
+@keyframes rotate {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+.sun-container {
+  animation: rotate 60s linear infinite;
+}
+
+/* Wind Effect */
+@keyframes wind {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100vw); }
+}
+.wind-line {
+  animation: wind linear infinite;
+}
