@@ -25,6 +25,12 @@ export default function Page() {
   const [currentTime, setCurrentTime] = useState<string>('')
   const [showIntro, setShowIntro] = useState(true)
 
+  const resetWeatherData = () => {
+    setWeatherData(null)
+    setError(null)
+    setLoading(false)
+  }
+
   useEffect(() => {
     // Atualiza o horário a cada segundo
     const updateTime = () => {
@@ -104,10 +110,15 @@ export default function Page() {
                   <Github className="h-3.5 w-3.5 text-white" />
                 </a>
                 <div className="h-5 w-px bg-white/20 mx-1.5" /> {/* Divisor vertical */}
-                <div className="flex items-center gap-1">
-                  <Compass className="h-5 w-5 text-white" />
-                  <span className="text-lg font-bold text-white">ClimateAPP</span>
-                </div>
+                <button 
+                  onClick={resetWeatherData}
+                  className="flex items-center gap-2 px-4 py-2 rounded-full 
+                            hover:bg-white/10 transition-all duration-300
+                            border border-transparent hover:border-white/20"
+                >
+                  <Compass className="h-6 w-6 text-white" />
+                  <span className="text-xl font-bold text-white">ClimateAPP</span>
+                </button>
               </div>
               <div className="flex items-center gap-4">
                 <Link 
