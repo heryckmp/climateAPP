@@ -202,9 +202,6 @@ export default function InteractiveGlobe() {
               opacity: 1
             })
           }
-          pointOfView={{
-            altitude: 2.5
-          }}
         />
       </div>
     </div>
