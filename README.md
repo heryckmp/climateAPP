@@ -14,8 +14,6 @@ ClimateAPP é uma aplicação web moderna para consulta de previsão do tempo, d
 - 📱 Design responsivo
 - 🌍 Globo interativo 3D com:
   - Localização do usuário em tempo real
-  - Conexões globais animadas
-  - Efeitos de iluminação realistas
   - Textura de alta resolução
   - Atmosfera dinâmica
   - Rotação automática suave
@@ -33,7 +31,7 @@ ClimateAPP é uma aplicação web moderna para consulta de previsão do tempo, d
 - [TypeScript](https://www.typescriptlang.org/)
 - [Tailwind CSS](https://tailwindcss.com/)
 - [Lucide Icons](https://lucide.dev/)
-- [Meteoblue API](https://www.meteoblue.com/)
+- [Visual Crossing Weather API](https://www.visualcrossing.com/)
 - [Three.js](https://threejs.org/)
 - [React-Globe.GL](https://github.com/vasturiano/react-globe.gl)
 - [Leaflet](https://leafletjs.com/)
@@ -84,9 +82,9 @@ npm install
 cp .env.example .env.local
 ```
 
-4. Adicione sua chave da API Meteoblue no arquivo `.env.local`:
+4. Adicione sua chave da API Visual Crossing no arquivo `.env.local`:
 ```env
-METEOBLUE_API_KEY=sua_chave_aqui
+VISUAL_CROSSING_API_KEY=sua_chave_aqui
 ```
 
 5. Inicie o servidor de desenvolvimento:
@@ -116,7 +114,7 @@ Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para ma
 
 ## 🙏 Agradecimentos
 
-- [Meteoblue](https://www.meteoblue.com/) pela API de previsão do tempo
+- [Visual Crossing](https://www.visualcrossing.com/) pela API de previsão do tempo
 - [Lucide](https://lucide.dev/) pelos ícones
 - [RainViewer](https://www.rainviewer.com/) pela API do radar meteorológico
 
@@ -124,7 +122,6 @@ Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para ma
 
 O aplicativo inclui um globo terrestre 3D interativo com recursos avançados:
 - Visualização da localização do usuário em tempo real
-- Conexões globais animadas com efeito de brilho
 - Textura realista da Terra em alta resolução
 - Efeitos de relevo e topografia
 - Atmosfera dinâmica com gradiente de cores
